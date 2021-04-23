@@ -5,13 +5,13 @@
 On Mac:
 
 ```
-brew install clang-format portaudio ffmpeg libmad
+brew install clang-format portaudio ffmpeg libmad lame
 ```
 
 On ubuntu:
 
 ```
-apt install clang-format portaudio19-dev ffmpeg libavutil-dev libswresample-dev libmad0-dev
+apt install clang-format portaudio19-dev ffmpeg libavutil-dev libswresample-dev libmad0-dev lame
 ```
 
 To start your Phoenix server:
