@@ -1,32 +1,35 @@
 defmodule Media.StreamToFile do
   use Membrane.Pipeline
 
-  alias Membrane.{File, FFmpeg, MP3.MAD, MP3.Lame, PortAudio, Time}
-  alias Membrane.Element.Tee
-  alias Membrane.Caps.Audio.Raw
+  alias Membrane.{File, PortAudio}
+  alias Membrane.Audiometer.Peakmeter
 
   @impl true
   def handle_init(output_directory) do
     Elixir.File.mkdir_p!(output_directory)
+    Process.register(self(), :default_stream)
 
     children = [
       mic_input: PortAudio.Source,
-      converter: %FFmpeg.SWResample.Converter{
-        input_caps: %Raw{channels: 2, format: :s16le, sample_rate: 48_000},
-        output_caps: %Raw{channels: 2, format: :s32le, sample_rate: 44_100}
-      },
-      splitter: Tee.Master,
-      encoder: Lame.Encoder,
-      raw_output: %File.Sink{location: Path.join(output_directory, "out.raw")},
-      encoded_output: %File.Sink{location: Path.join(output_directory, "out.mp3")}
+      audiometer: %Peakmeter{interval: Membrane.Time.milliseconds(50)},
+      raw_output: %File.Sink{location: Path.join(output_directory, "out.raw")}
     ]
 
     links = [
-      link(:mic_input) |> to(:converter) |> to(:splitter),
-      link(:splitter) |> via_out(:master) |> to(:raw_output),
-      link(:splitter) |> via_out(:copy) |> to(:encoder) |> to(:encoded_output)
+      link(:mic_input) |> to(:audiometer) |> to(:raw_output)
     ]
 
     {{:ok, spec: %ParentSpec{children: children, links: links}}, %{}}
+  end
+
+  @impl true
+  def handle_notification({:amplitudes, channels}, _element, _context, state) do
+    IO.inspect(channels, label: "amplitude")
+    Phoenix.PubSub.broadcast!(Media.PubSub, "audio", {:amplitudes, channels})
+    {:ok, state}
+  end
+
+  def handle_notification(_any, _element, _context, state) do
+    {:ok, state}
   end
 end

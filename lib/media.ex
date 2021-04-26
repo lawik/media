@@ -12,6 +12,25 @@ defmodule Media do
     {:ok, pid}
   end
 
+  def ensure_playing do
+    :default_stream
+    |> Process.whereis()
+    |> Media.StreamToFile.play()
+  end
+
+  @default "output"
+  def start do
+    {:ok, pid} = record_to_file(@default)
+  end
+
+  def stop({:ok, pid}) do
+    stop_to_file(pid)
+  end
+
+  def stop(pid) do
+    stop_to_file(pid)
+  end
+
   def stop_to_file(pid) do
     Media.StreamToFile.stop_and_terminate(pid)
   end

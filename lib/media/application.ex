@@ -14,9 +14,11 @@ defmodule Media.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Media.PubSub},
       # Start the Endpoint (http/https)
-      MediaWeb.Endpoint
-      # Start a worker by calling: Media.Worker.start_link(arg)
-      # {Media.Worker, arg}
+      MediaWeb.Endpoint,
+      %{
+        id: Media.StreamToFile,
+        start: {Media.StreamToFile, :start_link, ["output"]}
+      }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
