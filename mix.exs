@@ -53,7 +53,9 @@ defmodule Media.MixProject do
       {:membrane_ffmpeg_swresample_plugin, "~> 0.5.0"},
       {:membrane_mp3_mad_plugin, "~> 0.5.0"},
       {:membrane_mp3_lame_plugin, "~> 0.6.0"},
-      {:membrane_element_tee, "~> 0.4.0"}
+      # {:membrane_element_tee, "~> 0.4.0"},
+      {:membrane_audiometer_plugin, "~> 0.4.0"},
+      {:membrane_element_fake, "~> 0.4"}
     ]
   end
 

@@ -1,8 +1,9 @@
 defmodule Media.StreamToFile do
   use Membrane.Pipeline
 
-  alias Membrane.{File, PortAudio}
+  alias Membrane.PortAudio
   alias Membrane.Audiometer.Peakmeter
+  alias Membrane.Element.Fake
 
   @impl true
   def handle_init(output_directory) do
@@ -12,11 +13,11 @@ defmodule Media.StreamToFile do
     children = [
       mic_input: PortAudio.Source,
       audiometer: %Peakmeter{interval: Membrane.Time.milliseconds(50)},
-      raw_output: %File.Sink{location: Path.join(output_directory, "out.raw")}
+      sink: Fake.Sink.Buffers
     ]
 
     links = [
-      link(:mic_input) |> to(:audiometer) |> to(:raw_output)
+      link(:mic_input) |> to(:audiometer) |> to(:sink)
     ]
 
     {{:ok, spec: %ParentSpec{children: children, links: links}}, %{}}
